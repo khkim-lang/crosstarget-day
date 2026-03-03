@@ -14,31 +14,33 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const time = searchParams.get("time");
 
-    // Fetch all reservations from Supabase
-    const { data: reservations, error } = await supabase
-        .from('reservations')
-        .select('*');
-
     const slots = store.getSlots();
+    let reservations: any[] = [];
 
-    if (error) {
-        console.error("[Supabase] Fetch error (returning fallback slots):", error);
-        const fallbackSlots = slots.map(slot => ({
-            ...slot,
-            reservationCount: 0
-        }));
-        return NextResponse.json({ slots: fallbackSlots, warning: "Supabase connection error" });
+    try {
+        // Fetch all reservations from Supabase
+        const { data, error } = await supabase
+            .from('reservations')
+            .select('*');
+
+        if (error) {
+            console.error("[Supabase GET] Query error:", error);
+        } else {
+            reservations = data || [];
+        }
+    } catch (err) {
+        console.error("[Supabase GET] Critical error during fetch:", err);
     }
 
     if (time) {
-        const filtered = reservations ? reservations.filter(r => r.time === time) : [];
+        const filtered = reservations.filter(r => r.time === time);
         return NextResponse.json({ reservations: filtered });
     }
 
-    // Calculate reservation count for each slot from Supabase data
+    // Calculate reservation count for each slot
     const slotsWithCount = slots.map(slot => ({
         ...slot,
-        reservationCount: reservations ? reservations.filter(r => r.time === slot.time).length : 0
+        reservationCount: reservations.filter(r => r.time === slot.time).length
     }));
 
     return NextResponse.json({ slots: slotsWithCount });

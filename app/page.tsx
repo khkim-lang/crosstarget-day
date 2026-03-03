@@ -4,11 +4,13 @@ import { useEffect, useState } from "react"
 import { TimeSlot } from "@/lib/store"
 import { TimeSlotCard } from "@/components/time-slot"
 import { ReservationModal } from "@/components/reservation-modal"
-import { Loader2 } from "lucide-react"
+import { Loader2, AlertCircle } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function Home() {
   const [slots, setSlots] = useState<(TimeSlot & { reservationCount: number })[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<(TimeSlot & { reservationCount: number }) | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -16,9 +18,15 @@ export default function Home() {
     try {
       const res = await fetch("/api/reservations")
       const data = await res.json()
-      setSlots(data.slots || [])
-    } catch (error) {
-      console.error("Failed to fetch slots:", error)
+      if (data.error) {
+        setError(data.error)
+      } else {
+        setSlots(data.slots || [])
+        if (data.warning) console.warn("API Warning:", data.warning)
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch slots:", err)
+      setError("데이터를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.")
     } finally {
       setIsLoading(false)
     }
@@ -61,19 +69,38 @@ export default function Home() {
             </div>
           </div>
 
+          {error && (
+            <Alert variant="destructive" className="mb-8">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>오류 발생</AlertTitle>
+              <AlertDescription>
+                {error}
+                <div className="mt-2 text-xs opacity-70">
+                  Vercel 환경 변수 설정을 확인해 주세요.
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {isLoading ? (
             <div className="flex h-64 items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 animate-in fade-in duration-700">
-              {slots.map((slot) => (
-                <TimeSlotCard
-                  key={slot.time}
-                  slot={slot}
-                  onClick={() => handleSlotClick(slot)}
-                />
-              ))}
+              {slots.length > 0 ? (
+                slots.map((slot) => (
+                  <TimeSlotCard
+                    key={slot.time}
+                    slot={slot}
+                    onClick={() => handleSlotClick(slot)}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full border-2 border-dashed rounded-lg p-12 text-center text-muted-foreground">
+                  표시할 예약 슬롯이 없습니다.
+                </div>
+              )}
             </div>
           )}
         </div>
