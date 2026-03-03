@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 // Helper to clean environment variables (removes literal quotes if present)
 const sanitize = (val: string | undefined) => {
     if (!val) return val
-    return val.replace(/^["']|["']$/g, "")
+    return val.trim().replace(/^["']|["']$/g, "")
 }
 
 export async function GET(request: Request) {

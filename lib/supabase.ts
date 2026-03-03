@@ -2,7 +2,8 @@ import { createClient } from '@supabase/supabase-js'
 
 const sanitize = (val: string | undefined) => {
     if (!val) return val
-    return val.replace(/^["']|["']$/g, "")
+    // Trim spaces/newlines and remove literal quotes
+    return val.trim().replace(/^["']|["']$/g, "")
 }
 
 const supabaseUrl = sanitize(process.env.NEXT_PUBLIC_SUPABASE_URL)
