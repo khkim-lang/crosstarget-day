@@ -99,9 +99,19 @@ export async function POST(request: Request) {
         return NextResponse.json(reservation, { status: 201 });
     } catch (error: any) {
         console.error("Critical error in POST /api/reservations:", error);
+
+        // Check if it's a known configuration error we threw
+        const errorMessage = error.message || "Failed to create reservation";
+        const isConfigError = errorMessage.includes("Supabase environment variables") ||
+            errorMessage.includes("Invalid Supabase URL");
+
         return NextResponse.json(
-            { error: error.message || "Failed to create reservation", details: error.toString() },
-            { status: 400 }
+            {
+                error: errorMessage,
+                details: error.toString(),
+                advice: isConfigError ? "Please check Vercel Environment Variables naming and values." : undefined
+            },
+            { status: isConfigError ? 500 : 400 }
         );
     }
 }
