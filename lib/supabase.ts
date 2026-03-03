@@ -21,7 +21,7 @@ export const getSupabase = () => {
     if (!url || !key || !url.startsWith("http")) {
         const errorMsg = !url || !key
             ? "Supabase environment variables are missing in Vercel settings."
-            : `Invalid Supabase URL format. Make sure it starts with https://. (Length: ${url.length})`
+            : `Invalid Supabase URL format (starts with "${url.substring(0, 10)}..."). Make sure it starts with https://. (Length: ${url.length})`
 
         if (process.env.NODE_ENV === "production") {
             console.error(`[Supabase Error] ${errorMsg}`)
