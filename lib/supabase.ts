@@ -1,25 +1,37 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 const sanitize = (val: string | undefined) => {
-    if (!val) return val
-    // Trim spaces/newlines and remove literal quotes
-    return val.trim().replace(/^["']|["']$/g, "")
+    if (!val) return undefined
+    const cleaned = val.trim().replace(/^["']|["']$/g, "")
+    return cleaned === "" ? undefined : cleaned
 }
 
-const supabaseUrl = sanitize(process.env.NEXT_PUBLIC_SUPABASE_URL)
-const supabaseAnonKey = sanitize(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+let supabaseInstance: SupabaseClient | null = null
 
-// Using placeholders to prevent build errors if env vars are missing
-// The app will still need real credentials to function correctly.
-export const supabase = createClient(
-    supabaseUrl || "https://placeholder-url.supabase.co",
-    supabaseAnonKey || "placeholder-key"
-)
+export const getSupabase = () => {
+    if (supabaseInstance) return supabaseInstance
 
-if (!supabaseUrl || !supabaseAnonKey) {
-    if (process.env.NODE_ENV === "development") {
-        console.warn(
-            "⚠️ Supabase credentials missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local"
-        )
+    const url = sanitize(process.env.NEXT_PUBLIC_SUPABASE_URL)
+    const key = sanitize(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+
+    if (!url || !key) {
+        // We throw ONLY when the client is actually requested and values are missing
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error('Missing Supabase environment variables')
+        }
+        // Fallback for development/build warning
+        return createClient('https://placeholder-url.supabase.co', 'placeholder-key')
     }
+
+    supabaseInstance = createClient(url, key)
+    return supabaseInstance
 }
+
+// Export a proxy for backward compatibility if possible, or just export the helper
+export const supabase = new Proxy({} as SupabaseClient, {
+    get: (_, prop) => {
+        const client = getSupabase()
+        return (client as any)[prop]
+    }
+})
+

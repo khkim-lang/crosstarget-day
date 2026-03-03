@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { store } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+
 // Helper to clean environment variables (removes literal quotes if present)
 const sanitize = (val: string | undefined) => {
     if (!val) return val
