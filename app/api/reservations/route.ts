@@ -11,21 +11,26 @@ export async function GET(request: Request) {
         .from('reservations')
         .select('*');
 
+    const slots = store.getSlots();
+
     if (error) {
-        console.error("Supabase fetch error:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("Supabase fetch error (returning fallback slots):", error);
+        const fallbackSlots = slots.map(slot => ({
+            ...slot,
+            reservationCount: 0
+        }));
+        return NextResponse.json({ slots: fallbackSlots, warning: "Supabase connection error" });
     }
 
     if (time) {
-        const filtered = reservations.filter(r => r.time === time);
+        const filtered = reservations ? reservations.filter(r => r.time === time) : [];
         return NextResponse.json({ reservations: filtered });
     }
 
-    const slots = store.getSlots();
     // Calculate reservation count for each slot from Supabase data
     const slotsWithCount = slots.map(slot => ({
         ...slot,
-        reservationCount: reservations.filter(r => r.time === slot.time).length
+        reservationCount: reservations ? reservations.filter(r => r.time === slot.time).length : 0
     }));
 
     return NextResponse.json({ slots: slotsWithCount });
