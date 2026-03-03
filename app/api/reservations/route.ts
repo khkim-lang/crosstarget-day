@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { store } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 
+// Helper to clean environment variables (removes literal quotes if present)
+const sanitize = (val: string | undefined) => {
+    if (!val) return val
+    return val.replace(/^["']|["']$/g, "")
+}
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const time = searchParams.get("time");
@@ -14,7 +20,7 @@ export async function GET(request: Request) {
     const slots = store.getSlots();
 
     if (error) {
-        console.error("Supabase fetch error (returning fallback slots):", error);
+        console.error("[Supabase] Fetch error (returning fallback slots):", error);
         const fallbackSlots = slots.map(slot => ({
             ...slot,
             reservationCount: 0
@@ -58,12 +64,12 @@ export async function POST(request: Request) {
             .single();
 
         if (error) {
-            throw new Error(error.message);
+            console.error("[Supabase] Insert error:", error);
+            throw new Error(`Supabase Error: ${error.message}`);
         }
 
         // 2. Sync to Google Sheets if webhook is configured
-        const webhookUrl = process.env.NEXT_PUBLIC_GOOGLE_SHEETS_WEBHOOK_URL;
-        console.log(`[Google Sheets] Webhook URL present: ${!!webhookUrl}`);
+        const webhookUrl = sanitize(process.env.NEXT_PUBLIC_GOOGLE_SHEETS_WEBHOOK_URL);
 
         if (webhookUrl) {
             const slot = store.getSlots().find(s => s.time === reservation.time);
@@ -72,17 +78,16 @@ export async function POST(request: Request) {
                 sessionName: slot?.sessionName || ""
             };
 
-            console.log("[Google Sheets] Sending payload:", JSON.stringify(payload));
+            console.log(`[Google Sheets] Sending payload to: ${webhookUrl}`);
 
+            // Fire and forget (but catch errors)
             fetch(webhookUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             })
                 .then(async (res) => {
-                    const text = await res.text();
                     console.log(`[Google Sheets] Response status: ${res.status}`);
-                    console.log(`[Google Sheets] Response text: ${text.substring(0, 100)}`);
                 })
                 .catch(err => {
                     console.error("[Google Sheets] Sync failed error:", err);
@@ -91,8 +96,9 @@ export async function POST(request: Request) {
 
         return NextResponse.json(reservation, { status: 201 });
     } catch (error: any) {
+        console.error("Critical error in POST /api/reservations:", error);
         return NextResponse.json(
-            { error: error.message || "Failed to create reservation" },
+            { error: error.message || "Failed to create reservation", details: error.toString() },
             { status: 400 }
         );
     }
