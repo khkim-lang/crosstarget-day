@@ -14,22 +14,38 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const time = searchParams.get("time");
 
-    const slots = store.getSlots();
+    let sessions: any[] = [];
     let reservations: any[] = [];
 
     try {
-        // Fetch all reservations from Supabase
-        const { data, error } = await supabase
+        // 1. Fetch sessions configuration
+        const { data: sessionData, error: sessionError } = await supabase
+            .from('sessions')
+            .select('*')
+            .eq('is_active', true)
+            .order('time', { ascending: true });
+
+        if (sessionError) {
+            console.error("[Supabase GET] Sessions error:", sessionError);
+            // Fallback to default
+            sessions = [
+                { time: "14:00", name: "식음료" },
+                { time: "15:00", name: "금융" },
+                { time: "16:00", name: "교육" },
+                { time: "17:00", name: "부동산/분양" }
+            ];
+        } else {
+            sessions = sessionData || [];
+        }
+
+        // 2. Fetch all reservations
+        const { data: reservationData, error: reservationError } = await supabase
             .from('reservations')
             .select('*');
 
-        if (error) {
-            console.error("[Supabase GET] Query error:", error);
-        } else {
-            reservations = data || [];
-        }
+        reservations = reservationData || [];
     } catch (err) {
-        console.error("[Supabase GET] Critical error during fetch:", err);
+        console.error("[Supabase GET] Critical error:", err);
     }
 
     if (time) {
@@ -37,13 +53,13 @@ export async function GET(request: Request) {
         return NextResponse.json({ reservations: filtered });
     }
 
-    // Calculate reservation count for each slot
-    const slotsWithCount = slots.map(slot => ({
-        ...slot,
-        reservationCount: reservations.filter(r => r.time === slot.time).length
+    const dynamicSlots = sessions.map(session => ({
+        time: session.time,
+        sessionName: session.name,
+        reservationCount: reservations.filter(r => r.time === session.time).length
     }));
 
-    return NextResponse.json({ slots: slotsWithCount });
+    return NextResponse.json({ slots: dynamicSlots });
 }
 
 export async function POST(request: Request) {
@@ -77,10 +93,16 @@ export async function POST(request: Request) {
         console.log(`[Webhook Check] URL exists: ${!!webhookUrl}`);
 
         if (webhookUrl) {
-            const slot = store.getSlots().find(s => s.time === reservation.time);
+            // Find session name from Supabase for the webhook
+            const { data: sessionData } = await supabase
+                .from('sessions')
+                .select('name')
+                .eq('time', reservation.time)
+                .single();
+
             const payload = {
                 ...reservation,
-                sessionName: slot?.sessionName || ""
+                sessionName: sessionData?.name || "일반 세션"
             };
 
             console.log(`[Google Sheets] Sending payload to: ${webhookUrl}`, payload);
