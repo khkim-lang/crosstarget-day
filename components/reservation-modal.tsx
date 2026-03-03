@@ -86,6 +86,7 @@ export function ReservationModal({ isOpen, onClose, slot, onSuccess }: Reservati
                 throw new Error(await res.text())
             }
 
+            window.alert("입력한 이메일로 확인 메일이 발송 됩니다.")
             onSuccess()
             fetchReservations()
             setView("list")
