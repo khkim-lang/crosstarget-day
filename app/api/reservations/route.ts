@@ -58,17 +58,30 @@ export async function POST(request: Request) {
 
         // 2. Sync to Google Sheets if webhook is configured
         const webhookUrl = process.env.NEXT_PUBLIC_GOOGLE_SHEETS_WEBHOOK_URL;
+        console.log(`[Google Sheets] Webhook URL present: ${!!webhookUrl}`);
+
         if (webhookUrl) {
             const slot = store.getSlots().find(s => s.time === reservation.time);
+            const payload = {
+                ...reservation,
+                sessionName: slot?.sessionName || ""
+            };
+
+            console.log("[Google Sheets] Sending payload:", JSON.stringify(payload));
+
             fetch(webhookUrl, {
                 method: "POST",
-                mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    ...reservation,
-                    sessionName: slot?.sessionName || ""
-                }),
-            }).catch(err => console.error("Google Sheets sync failed:", err));
+                body: JSON.stringify(payload),
+            })
+                .then(async (res) => {
+                    const text = await res.text();
+                    console.log(`[Google Sheets] Response status: ${res.status}`);
+                    console.log(`[Google Sheets] Response text: ${text.substring(0, 100)}`);
+                })
+                .catch(err => {
+                    console.error("[Google Sheets] Sync failed error:", err);
+                });
         }
 
         return NextResponse.json(reservation, { status: 201 });
