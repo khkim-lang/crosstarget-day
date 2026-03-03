@@ -82,16 +82,16 @@ export async function POST(request: Request) {
                 sessionName: slot?.sessionName || ""
             };
 
-            console.log(`[Google Sheets] Sending payload to: ${webhookUrl}`);
+            console.log(`[Google Sheets] Sending payload to: ${webhookUrl}`, payload);
 
-            // Fire and forget (but catch errors)
             fetch(webhookUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             })
                 .then(async (res) => {
-                    console.log(`[Google Sheets] Response status: ${res.status}`);
+                    const resText = await res.text();
+                    console.log(`[Google Sheets] Response status: ${res.status}, Body: ${resText}`);
                 })
                 .catch(err => {
                     console.error("[Google Sheets] Sync failed error:", err);
