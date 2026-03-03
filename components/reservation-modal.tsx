@@ -14,7 +14,6 @@ const formSchema = z.object({
     name: z.string().min(1, "이름을 입력해주세요"),
     email: z.string().email("유효한 이메일을 입력해주세요"),
     phone: z.string().min(1, "연락처를 입력해주세요"),
-    attendees: z.string().min(1, "예상 참석자수를 입력해주세요").transform((val) => parseInt(val, 10)),
     industry: z.string().min(1, "담당 업종을 입력해주세요"),
 })
 
@@ -190,15 +189,10 @@ export function ReservationModal({ isOpen, onClose, slot, onSuccess }: Reservati
                                 {errors.phone && <p className="text-[13px] text-destructive">{errors.phone.message}</p>}
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="attendees" className="text-sm font-medium leading-none">참석자수</label>
-                                <input {...register("attendees")} id="attendees" type="number" min="1" className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" placeholder="1" />
-                                {errors.attendees && <p className="text-[13px] text-destructive">{errors.attendees.message}</p>}
+                                <label htmlFor="industry" className="text-sm font-medium leading-none">담당 업종</label>
+                                <input {...register("industry")} id="industry" className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" placeholder="예: IT / 플랫폼" />
+                                {errors.industry && <p className="text-[13px] text-destructive">{errors.industry.message}</p>}
                             </div>
-                        </div>
-                        <div className="space-y-2 pb-2">
-                            <label htmlFor="industry" className="text-sm font-medium leading-none">담당 업종</label>
-                            <input {...register("industry")} id="industry" className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" placeholder="예: IT / 플랫폼" />
-                            {errors.industry && <p className="text-[13px] text-destructive">{errors.industry.message}</p>}
                         </div>
                         <div className="flex justify-end space-x-3 pt-2">
                             <button type="button" onClick={() => setView("list")} className="inline-flex h-10 items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary">뒤로가기</button>
@@ -209,6 +203,6 @@ export function ReservationModal({ isOpen, onClose, slot, onSuccess }: Reservati
                     </form>
                 )}
             </div>
-        </div>
+        </div >
     )
 }

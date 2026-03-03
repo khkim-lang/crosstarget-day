@@ -60,7 +60,7 @@ export async function POST(request: Request) {
                     name: body.name,
                     email: body.email,
                     phone: body.phone,
-                    attendees: parseInt(body.attendees, 10),
+                    attendees: 1, // Default to 1 as requested
                     industry: body.industry
                 }
             ])

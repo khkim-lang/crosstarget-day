@@ -5,7 +5,7 @@ export type Reservation = {
   name: string;
   email: string;
   phone: string;
-  attendees: number;
+  attendees?: number;
   industry: string;
 };
 
