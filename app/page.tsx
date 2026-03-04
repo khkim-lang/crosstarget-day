@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { TimeSlot } from "@/lib/store"
 import { TimeSlotCard } from "@/components/time-slot"
 import { ReservationModal } from "@/components/reservation-modal"
-import { Loader2, AlertCircle } from "lucide-react"
+import { Loader2, AlertCircle, ChevronDown } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function Home() {
@@ -45,18 +45,31 @@ export default function Home() {
     fetchSlots() // Refresh slots to update counts
   }
 
+  const scrollToPoster = () => {
+    const element = document.getElementById('event-poster');
+    element?.scrollIntoView({ behavior: 'smooth' });
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto max-w-5xl px-4 py-16 sm:py-24">
         {/* Header Section */}
         <div className="mb-16 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl text-foreground">
-            CrossTarget Day
+            CrossTarget Day for Incross
           </h1>
           <p className="mt-4 text-lg text-muted-foreground sm:text-xl">
             2026년 3월 11일 마이크로 세션 예약
           </p>
           <div className="mx-auto mt-6 h-1 w-12 rounded-full bg-primary" />
+
+          <button
+            onClick={scrollToPoster}
+            className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors group"
+          >
+            상세 행사 안내 보기
+            <ChevronDown className="h-4 w-4 transition-transform group-hover:translate-y-1" />
+          </button>
         </div>
 
         {/* Content Section */}
@@ -103,6 +116,29 @@ export default function Home() {
               )}
             </div>
           )}
+
+          {/* Scroll Guidance Arrow */}
+          <div className="mt-16 flex flex-col items-center justify-center animate-bounce opacity-50">
+            <p className="text-xs text-muted-foreground mb-2">상세 안내 보기</p>
+            <ChevronDown className="h-6 w-6" />
+          </div>
+
+          {/* Event Poster Section */}
+          <div id="event-poster" className="mt-16 border-t pt-16 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <div className="mb-8 text-center">
+              <h3 className="text-3xl font-semibold tracking-tight">행사 안내</h3>
+              <p className="mt-3 text-lg text-muted-foreground">
+                💡 마이크로 세션 예약 전, 아래 포스터를 통해 당일 행사의 주요 경품과 세부 내용을 확인해 보세요!
+              </p>
+            </div>
+            <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl border shadow-2xl bg-card">
+              <img
+                src="/poster.png"
+                alt="CrossTarget Day Event Poster"
+                className="w-full h-auto"
+              />
+            </div>
+          </div>
         </div>
       </main>
 

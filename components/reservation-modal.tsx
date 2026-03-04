@@ -14,7 +14,7 @@ const formSchema = z.object({
     name: z.string().min(1, "이름을 입력해주세요"),
     email: z.string().email("유효한 이메일을 입력해주세요"),
     phone: z.string().min(1, "연락처를 입력해주세요"),
-    industry: z.string().min(1, "담당 업종을 입력해주세요"),
+    industry: z.string().optional(),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -114,11 +114,11 @@ export function ReservationModal({ isOpen, onClose, slot, onSuccess }: Reservati
                     <X className="h-4 w-4" />
                 </button>
 
-                <div className="mb-8">
+                <div className="mb-6">
                     <h2 className="text-2xl font-semibold tracking-tight">
                         {view === "list" ? "예약자 명단" : "세션 예약"}
                     </h2>
-                    <p className="mt-2 text-sm text-muted-foreground">
+                    <p className="mt-1 text-sm text-muted-foreground">
                         {slot.time} • <span className="font-semibold text-foreground">{slot.sessionName}</span>
                     </p>
                 </div>
@@ -137,7 +137,7 @@ export function ReservationModal({ isOpen, onClose, slot, onSuccess }: Reservati
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <p className="font-medium">{res.name} <span className="text-xs text-muted-foreground ml-1">({res.team})</span></p>
-                                                    <p className="text-xs text-muted-foreground mt-0.5">{res.industry} • 참석 {res.attendees}명</p>
+                                                    <p className="text-xs text-muted-foreground mt-0.5">{res.industry}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -190,8 +190,8 @@ export function ReservationModal({ isOpen, onClose, slot, onSuccess }: Reservati
                                 {errors.phone && <p className="text-[13px] text-destructive">{errors.phone.message}</p>}
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="industry" className="text-sm font-medium leading-none">담당 업종</label>
-                                <input {...register("industry")} id="industry" className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" placeholder="예: IT / 플랫폼" />
+                                <label htmlFor="industry" className="text-sm font-medium leading-none">담당 광고주/업종(선택사항)</label>
+                                <input {...register("industry")} id="industry" className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" placeholder="예: 광고주명 또는 업종" />
                                 {errors.industry && <p className="text-[13px] text-destructive">{errors.industry.message}</p>}
                             </div>
                         </div>
