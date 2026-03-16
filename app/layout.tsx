@@ -14,8 +14,8 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Liquid Glass Dashboard",
-  description: "A premium analytics dashboard with iOS 26-inspired liquid glass design",
+  title: "CrossTarget Day for DMC미디어",
+  description: "2026년 3월 19일 마이크로 세션 예약",
 }
 
 export const viewport: Viewport = {

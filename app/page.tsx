@@ -56,10 +56,10 @@ export default function Home() {
         {/* Header Section */}
         <div className="mb-16 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl text-foreground">
-            CrossTarget Day for Incross
+            CrossTarget Day for DMC미디어
           </h1>
           <p className="mt-4 text-lg text-muted-foreground sm:text-xl">
-            2026년 3월 11일 마이크로 세션 예약
+            2026년 3월 19일 마이크로 세션 예약
           </p>
           <div className="mx-auto mt-6 h-1 w-12 rounded-full bg-primary" />
 
