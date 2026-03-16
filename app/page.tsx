@@ -126,10 +126,16 @@ export default function Home() {
           {/* Event Poster Section */}
           <div id="event-poster" className="mt-16 border-t pt-16 animate-in fade-in slide-in-from-bottom-4 duration-1000">
             <div className="mb-8 text-center">
-              <h3 className="text-3xl font-semibold tracking-tight">행사 안내</h3>
+              <h3 className="text-3xl font-semibold tracking-tight">크로스타겟 DAY for DMC미디어</h3>
               <p className="mt-3 text-lg text-muted-foreground">
-                💡 마이크로 세션 예약 전, 아래 포스터를 통해 당일 행사의 주요 경품과 세부 내용을 확인해 보세요!
+                업종별로 세션 신청하고 100% 경품 받아가세요!
               </p>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span className="text-primary">📅</span>
+                  2026년 3월 19일, 2시~6시
+                </span>
+              </div>
             </div>
             <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl border shadow-2xl bg-card">
               <img
